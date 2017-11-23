@@ -33,4 +33,48 @@ public class Hole extends Kalaha {
             return false;
         }
     }
+    private void processMove(Player activePlayer) {
+        if (owner == activePlayer && seeds == 1 && opposite().getSeeds() != 0) {
+            steal();
+        }
+        activePlayer.switchActive();
+    }
+    private void steal() {
+        seeds += opposite().getSeeds();
+        opposite().seeds = 0;
+        neighbour.moveToKalaha(seeds);
+        seeds = 0;
+    }
+    @Override
+    public Kalaha opposite() {
+        if (!(neighbour instanceof Hole)) {
+            return neighbour.getNeighbour();
+        }
+        return neighbour.opposite().getNeighbour();
+    }
+    @Override
+    public void moveToKalaha(int seedsToMove) {
+        neighbour.moveToKalaha(seedsToMove);
+    }
+    @Override
+    public boolean canMove() {
+        return !(seeds == 0) || neighbour.canMove();
+    }
+    @Override
+    public int score(Player player2) {
+        if (owner == player2) {
+            return neighbour.score(player2) + seeds;
+        } else {
+            return neighbour.score(player2) - seeds;
+        }
+    }
+    @Override
+    public void pass(int seedsToPass, Player activePlayer) {
+        seeds++;
+        if (seedsToPass - 1 > 0) {
+            neighbour.pass(seedsToPass - 1, activePlayer);
+        } else {
+            processMove(activePlayer);
+        }
+    }
 }
